@@ -33,7 +33,7 @@
         android:layout_marginTop="8dp"
         android:ems="10"
         android:hint="url"
-        android:inputType="textPersonName"
+        android:inputType="textWebEditText"
         app:layout_constraintBottom_toTopOf="@+id/webView_pager"
         app:layout_constraintEnd_toStartOf="@+id/go_button"
         app:layout_constraintStart_toStartOf="parent"
