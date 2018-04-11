@@ -2,7 +2,7 @@ package edu.temple.project8;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.net.Uri;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -55,11 +55,18 @@ public class WebViewFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * Method that changes the url loaded by the webview to be the url passed to it.
+     * @param website The url that we should change to.
+     */
     public void changeWebsite(String website){
         website = parseURL(website);
         WebView webView = rootView.findViewById(R.id.webBrowser_view);
         if(website !=null) {
             webView.loadUrl(website);
+        }
+        else{
+            Toast.makeText(getContext(), "Invalid URL, page not loaded.", Toast.LENGTH_LONG).show();
         }
     }
 
