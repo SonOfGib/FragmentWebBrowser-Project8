@@ -1,5 +1,6 @@
 package edu.temple.project8;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,11 +9,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
 /**
@@ -23,34 +26,64 @@ import java.net.URL;
 public class WebViewFragment extends Fragment {
 
     private OnTabSwitchListener mListener;
-    private String currentUrl = null;
+    private String currentUrl = "";
     public static String CURRENT_URL = "current_url";
+    private View rootView;
     public WebViewFragment() {
         // Required empty public constructor
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-       View rootView = inflater.inflate(R.layout.fragment_webview, container, false);
+       rootView = inflater.inflate(R.layout.fragment_webview, container, false);
        WebView webView = (WebView) rootView.findViewById(R.id.webBrowser_view);
-       if(currentUrl == null) {
-           currentUrl = (String) getArguments().get(CURRENT_URL);
-           if(currentUrl == null) {
-               Log.e("WebViewFragment","both current url and arguments were null ...");
-               return rootView;
+       WebSettings webSettings = webView.getSettings();
+       webSettings.setJavaScriptEnabled(true);
+       if(currentUrl.equals("") && savedInstanceState != null)
+            currentUrl = savedInstanceState.getString(CURRENT_URL);
+       webView.setWebViewClient(new WebViewClient() {
+           @Override
+           public void onPageFinished(WebView view, String url){
+               mListener.onTabSwitch(url);
+               currentUrl = view.getUrl();
            }
-       }
+       });
        webView.loadUrl(currentUrl);
-       currentUrl = webView.getUrl();
-        try {
-            mListener.onTabSwitch(new URL(currentUrl));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+       mListener.onTabSwitch(currentUrl);
         return rootView;
     }
 
+    public void changeWebsite(String website){
+        website = parseURL(website);
+        WebView webView = rootView.findViewById(R.id.webBrowser_view);
+        if(website !=null) {
+            webView.loadUrl(website);
+        }
+    }
+
+    private String parseURL(String website){
+        if (!website.startsWith("http://") && !website.startsWith("https://")) {
+            Log.e("websiteerror",website);
+            website = "http://" + website;
+        }
+        URL url =null;
+        try {
+            url = new URL(website);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return url.toString();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.d("debugUrl","saving state: " + currentUrl);
+        outState.putString(CURRENT_URL, currentUrl);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -69,6 +102,10 @@ public class WebViewFragment extends Fragment {
         mListener = null;
     }
 
+    public String getCurrentUrl(){
+        return currentUrl;
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -77,6 +114,6 @@ public class WebViewFragment extends Fragment {
      *
      */
     public interface OnTabSwitchListener {
-        void onTabSwitch(URL url);
+        void onTabSwitch(String url);
     }
 }

@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.net.MalformedURLException;
@@ -19,51 +20,35 @@ import java.util.ArrayList;
 
 public class WebViewFragmentPager extends FragmentStatePagerAdapter {
 
-    private ArrayList<WebViewFragment> fragmentArrayList;
+
     private Context context;
-    private FragmentManager fragmentManager;
+    private int numItems = 1;
     WebViewFragmentPager(FragmentManager fm, Context context) {
         super(fm);
-        fragmentArrayList = new ArrayList<WebViewFragment>();
-        fragmentManager = fm;
+
         this.context = context;
     }
 
-    public void addNewPage(String url) {
-        //url was passed from the user, it could be malformed.
-        url = parseURL(url);
-        Bundle args = new Bundle();
-        args.putString(WebViewFragment.CURRENT_URL, url);
-        WebViewFragment webViewFragment = new WebViewFragment();
-        webViewFragment.setArguments(args);
-        fragmentArrayList.add(webViewFragment);
+    /**
+     * This method is called when the user request a new tab. It calls getItem to create
+     * a new item and place it beyond the last index.
+     */
+    public void addNewPage() {
+        getItem(numItems);
+        numItems++;
+        notifyDataSetChanged();
+
     }
 
-    public void changePage(String url){
-        url = parseURL(url);
-        
-    }
-
-    private String parseURL(String website){
-        if (!website.startsWith("http://") || !website.startsWith("https://"))
-            website = "http://" + website;
-        URL url =null;
-        try {
-            url = new URL(website);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            Toast.makeText(context, "Failed to load url because it was malformed.",Toast.LENGTH_LONG).show();
-            return null;
-        }
-        return url.toString();
-    }
     @Override
     public Fragment getItem(int position) {
-        return fragmentArrayList.get(position);
+        Log.d("debugUrl",""+position);
+        WebViewFragment fragment = new WebViewFragment();
+        return fragment;
     }
 
     @Override
     public int getCount() {
-        return fragmentArrayList.size();
+        return numItems;
     }
 }
